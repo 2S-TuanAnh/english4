@@ -21,6 +21,45 @@
         .content {
             margin: 30px 0;
         }
+        .audio-section {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .audio-menu {
+            margin: 15px 0;
+        }
+        select {
+            padding: 10px;
+            font-size: 16px;
+            border: 2px solid #4CAF50;
+            border-radius: 5px;
+            width: 80%;
+            max-width: 300px;
+        }
+        audio {
+            width: 100%;
+            max-width: 400px;
+            margin: 15px 0;
+        }
+        .play-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .play-btn:hover {
+            background: #45a049;
+        }
+        .audio-info {
+            margin: 10px 0;
+            color: #666;
+        }
     </style>
 </head>
 <body>
@@ -30,14 +69,97 @@
     </div>
     
     <div class="content">
-        <h2>Coming Soon! 🚀</h2>
-        <p> Xin chào nhóm Nghiên cứu khoa học </p>
+        <h2>Listening Practice 🎧</h2>
+        <p>Xin chào nhóm Nghiên cứu khoa học</p>
         <p>We're building something amazing for English learners.</p>
         <p>Subdomain: <strong>english4u.2sybrid.io.vn</strong></p>
+    </div>
+
+    <!-- Audio Listening Section -->
+    <div class="audio-section">
+        <h3>🎵 Listening Audio Menu</h3>
+        
+        <div class="audio-menu">
+            <label for="audioSelect">Choose an audio file:</label>
+            <br>
+            <select id="audioSelect" onchange="changeAudio()">
+                <option value="">-- Select Audio --</option>
+                <option value="a1_01_us.wav">A1 Level - Lesson 01 (US Accent)</option>
+                <option value="a1_02_us.wav">A1 Level - Lesson 02 (US Accent)</option>
+                <option value="a1_03_us.wav">A1 Level - Lesson 03 (US Accent)</option>
+                <option value="a2_01_us.wav">A2 Level - Lesson 01 (US Accent)</option>
+                <option value="a2_02_us.wav">A2 Level - Lesson 02 (US Accent)</option>
+                <option value="b1_01_us.wav">B1 Level - Lesson 01 (US Accent)</option>
+                <option value="b1_02_us.wav">B1 Level - Lesson 02 (US Accent)</option>
+            </select>
+        </div>
+
+        <div id="audioPlayer" style="display: none;">
+            <div class="audio-info">
+                Now playing: <span id="currentAudio">a1_01_us.wav</span>
+            </div>
+            <audio id="myAudio" controls>
+                Your browser does not support the audio element.
+            </audio>
+            <div>
+                <button class="play-btn" onclick="playAudio()">▶ Play</button>
+                <button class="play-btn" onclick="pauseAudio()">⏸ Pause</button>
+                <button class="play-btn" onclick="stopAudio()">⏹ Stop</button>
+            </div>
+        </div>
     </div>
     
     <footer>
         <p>© 2024 English4U. All rights reserved.</p>
     </footer>
+
+    <script>
+        function changeAudio() {
+            const select = document.getElementById('audioSelect');
+            const audioPlayer = document.getElementById('audioPlayer');
+            const audio = document.getElementById('myAudio');
+            const currentAudioSpan = document.getElementById('currentAudio');
+            
+            const selectedFile = select.value;
+            
+            if (selectedFile) {
+                // Update audio source
+                audio.src = selectedFile;
+                currentAudioSpan.textContent = select.options[select.selectedIndex].text;
+                
+                // Show audio player
+                audioPlayer.style.display = 'block';
+                
+                // Load the new audio file
+                audio.load();
+            } else {
+                // Hide audio player if no selection
+                audioPlayer.style.display = 'none';
+            }
+        }
+
+        function playAudio() {
+            const audio = document.getElementById('myAudio');
+            audio.play();
+        }
+
+        function pauseAudio() {
+            const audio = document.getElementById('myAudio');
+            audio.pause();
+        }
+
+        function stopAudio() {
+            const audio = document.getElementById('myAudio');
+            audio.pause();
+            audio.currentTime = 0;
+        }
+
+        // Auto-play when new audio is selected
+        document.getElementById('audioSelect').addEventListener('change', function() {
+            if (this.value) {
+                setTimeout(playAudio, 500); // Small delay to ensure audio is loaded
+            }
+        });
+    </script>
 </body>
 </html>
