@@ -21,40 +21,31 @@
         .content {
             margin: 30px 0;
         }
-        .nav-buttons {
-            margin: 20px 0;
+        .audio-buttons {
+            margin: 30px 0;
         }
-        .nav-btn {
+        .audio-btn {
+            display: block;
             background: #4CAF50;
             color: white;
             border: none;
-            padding: 15px 30px;
+            padding: 15px;
             font-size: 18px;
             border-radius: 8px;
             cursor: pointer;
-            margin: 10px;
+            margin: 15px auto;
             text-decoration: none;
-            display: inline-block;
+            width: 80%;
+            max-width: 300px;
         }
-        .nav-btn:hover {
+        .audio-btn:hover {
             background: #45a049;
             transform: translateY(-2px);
-            transition: all 0.3s;
         }
-        .features {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin: 30px 0;
-            flex-wrap: wrap;
-        }
-        .feature-card {
-            background: #f9f9f9;
-            padding: 20px;
-            border-radius: 10px;
-            width: 200px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
+        .us-btn { background: #2196F3; }
+        .us-btn:hover { background: #1976D2; }
+        .uk-btn { background: #FF9800; }
+        .uk-btn:hover { background: #F57C00; }
     </style>
 </head>
 <body>
@@ -68,25 +59,10 @@
         <p>We're building something amazing for English learners.</p>
         <p>Subdomain: <strong>english4u.2sybrid.io.vn</strong></p>
         
-        <div class="nav-buttons">
-            <a href="listening.html" class="nav-btn">🎧 Practice Listening</a>
-            <a href="#" class="nav-btn">📚 Vocabulary</a>
-            <a href="#" class="nav-btn">✍️ Grammar</a>
-        </div>
-
-        <div class="features">
-            <div class="feature-card">
-                <h3>🎧 Listening</h3>
-                <p>Improve your listening skills with various accents</p>
-            </div>
-            <div class="feature-card">
-                <h3>🗣️ Speaking</h3>
-                <p>Practice pronunciation and conversation</p>
-            </div>
-            <div class="feature-card">
-                <h3>📖 Reading</h3>
-                <p>Enhance reading comprehension</p>
-            </div>
+        <div class="audio-buttons">
+            <h3>🎧 Listening Practice</h3>
+            <a href="a1_01_us.html" class="audio-btn us-btn">🇺🇸 A1 Lesson 01 - US Accent</a>
+            <a href="a1_01_uk.html" class="audio-btn uk-btn">🇬🇧 A1 Lesson 01 - UK Accent</a>
         </div>
     </div>
     
