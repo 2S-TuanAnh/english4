@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A1 Lesson 01 - UK Accent - English4U</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+        .header {
+            background: #FF9800;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .nav-buttons {
+            margin: 20px 0;
+        }
+        .nav-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 14px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .audio-section {
+            background: #f5f5f5;
+            padding: 30px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        audio {
+            width: 100%;
+            max-width: 400px;
+            margin: 20px 0;
+        }
+        .play-btn {
+            background: #FF9800;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .play-btn:hover {
+            background: #F57C00;
+        }
+        .lesson-info {
+            background: #FFF3E0;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🇬🇧 A1 Lesson 01 - UK Accent</h1>
+        <p>British English Pronunciation Practice</p>
+    </div>
+
+    <div class="nav-buttons">
+        <a href="index.html" class="nav-btn">🏠 Home</a>
+        <a href="a1_01_us.html" class="nav-btn">🇺🇸 US Version</a>
+    </div>
+
+    <div class="audio-section">
+        <div class="lesson-info">
+            <h3>📝 Lesson Content:</h3>
+            <p><strong>Topic:</strong> Basic Greetings and Introductions</p>
+            <p><strong>Level:</strong> A1 Beginner</p>
+            <p><strong>Accent:</strong> British English</p>
+        </div>
+
+        <h3>🎧 Listen to the audio:</h3>
+        <audio id="myAudio" controls>
+            <source src="audio/a1_01_uk.wav" type="audio/wav">
+            Your browser does not support the audio element.
+        </audio>
+        
+        <div>
+            <button class="play-btn" onclick="playAudio()">▶ Play</button>
+            <button class="play-btn" onclick="pauseAudio()">⏸ Pause</button>
+            <button class="play-btn" onclick="stopAudio()">⏹ Stop</button>
+            <button class="play-btn" onclick="replayAudio()">🔄 Replay</button>
+        </div>
+    </div>
+
+    <div class="lesson-info">
+        <h3>💡 Practice Tips:</h3>
+        <ul>
+            <li>Listen carefully to the British pronunciation</li>
+            <li>Repeat after the speaker</li>
+            <li>Focus on the long vowel sounds</li>
+            <li>Notice the dropped "r" sounds</li>
+        </ul>
+    </div>
+    
+    <footer>
+        <p>© 2024 English4U. All rights reserved.</p>
+    </footer>
+
+    <script>
+        function playAudio() {
+            const audio = document.getElementById('myAudio');
+            audio.play().catch(e => {
+                alert("Cannot play audio. Please check if the file exists.");
+            });
+        }
+
+        function pauseAudio() {
+            const audio = document.getElementById('myAudio');
+            audio.pause();
+        }
+
+        function stopAudio() {
+            const audio = document.getElementById('myAudio');
+            audio.pause();
+            audio.currentTime = 0;
+        }
+
+        function replayAudio() {
+            const audio = document.getElementById('myAudio');
+            audio.currentTime = 0;
+            audio.play();
+        }
+
+        // Auto play when page loads
+        window.addEventListener('load', function() {
+            setTimeout(playAudio, 1000);
+        });
+    </script>
+</body>
+</html>
