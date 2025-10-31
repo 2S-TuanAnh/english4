@@ -13,18 +13,146 @@ function initializeListeningPage() {
     setupAudioControls();
     setupQuizInteractions();
     setupToggleButtons();
+    restoreSelections(); // Khôi phục trạng thái chọn khi load trang
 }
 
-// Setup quiz interactions
+// Setup quiz interactions - FIXED TO PERSIST SELECTIONS
 function setupQuizInteractions() {
     const radioButtons = document.querySelectorAll('.quiz-question input[type="radio"]');
+    
     radioButtons.forEach(radio => {
         radio.addEventListener('change', function() {
-            const questionIndex = this.name.split('_')[1];
+            if (quizSubmitted) return;
+            
+            const questionId = this.closest('.quiz-question').getAttribute('data-question');
             const answerIndex = parseInt(this.value);
-            selectAnswer(questionIndex, answerIndex);
+            
+            console.log(`Question ${questionId} selected: ${answerIndex}`);
+            
+            // Update selection for this specific question only
+            updateQuestionSelection(questionId, answerIndex);
+            
+            selectAnswer(questionId, answerIndex);
         });
     });
+    
+    console.log(`Initialized ${radioButtons.length} radio buttons`);
+}
+
+// Update visual selection for a specific question
+function updateQuestionSelection(questionId, answerIndex) {
+    const questionElement = document.querySelector(`[data-question="${questionId}"]`);
+    
+    if (questionElement) {
+        // Remove selected class and custom styles from all options in this question
+        const allLabels = questionElement.querySelectorAll('.option-label');
+        allLabels.forEach(label => {
+            label.classList.remove('selected');
+            label.style.borderColor = '';
+            label.style.backgroundColor = '';
+            label.style.position = '';
+            
+            // Remove custom checkmark
+            const existingCheckmark = label.querySelector('.custom-checkmark');
+            if (existingCheckmark) {
+                existingCheckmark.remove();
+            }
+            
+            // Reset radio button styling
+            const radio = label.querySelector('input[type="radio"]');
+            if (radio) {
+                radio.style.borderColor = '';
+                radio.style.backgroundColor = '';
+            }
+        });
+        
+        // Add selected class and custom styles to the chosen option
+        const selectedLabel = questionElement.querySelector(`.option-label[data-option="${answerIndex}"]`);
+        if (selectedLabel) {
+            selectedLabel.classList.add('selected');
+            
+            // Add custom styling for selected option
+            selectedLabel.style.border = '2px solid #2196F3';
+            selectedLabel.style.backgroundColor = '#E3F2FD';
+            selectedLabel.style.borderRadius = '8px';
+            selectedLabel.style.padding = '12px 15px';
+            selectedLabel.style.position = 'relative';
+            
+            // Add custom checkmark
+            const checkmark = document.createElement('span');
+            checkmark.className = 'custom-checkmark';
+            checkmark.innerHTML = '✓';
+            checkmark.style.position = 'absolute';
+            checkmark.style.right = '15px';
+            checkmark.style.top = '50%';
+            checkmark.style.transform = 'translateY(-50%)';
+            checkmark.style.color = '#2196F3';
+            checkmark.style.fontWeight = 'bold';
+            checkmark.style.fontSize = '16px';
+            
+            selectedLabel.appendChild(checkmark);
+            
+            // Style the radio button
+            const radio = selectedLabel.querySelector('input[type="radio"]');
+            if (radio) {
+                radio.style.borderColor = '#2196F3';
+            }
+        }
+        
+        // Mark question as answered
+        questionElement.classList.add('answered');
+        questionElement.style.borderLeft = '6px solid #2196F3';
+        questionElement.style.backgroundColor = '#f0f8ff';
+    }
+}
+
+// Handle answer selection - PERSIST DATA
+function selectAnswer(questionId, answerIndex) {
+    currentQuizAnswers[questionId] = answerIndex;
+    
+    // Lưu vào localStorage để khôi phục sau này
+    saveSelectionsToStorage();
+    
+    console.log(`Saved answer for question ${questionId}: ${answerIndex}`);
+    console.log('All current answers:', currentQuizAnswers);
+}
+
+// Save selections to localStorage
+function saveSelectionsToStorage() {
+    try {
+        localStorage.setItem('quizSelections', JSON.stringify(currentQuizAnswers));
+    } catch (e) {
+        console.warn('Could not save selections to localStorage:', e);
+    }
+}
+
+// Restore selections from localStorage
+function restoreSelections() {
+    try {
+        const savedSelections = localStorage.getItem('quizSelections');
+        if (savedSelections) {
+            currentQuizAnswers = JSON.parse(savedSelections);
+            
+            // Restore visual selections
+            Object.keys(currentQuizAnswers).forEach(questionId => {
+                const answerIndex = currentQuizAnswers[questionId];
+                updateQuestionSelection(questionId, answerIndex);
+                
+                // Also check the radio button
+                const questionElement = document.querySelector(`[data-question="${questionId}"]`);
+                if (questionElement) {
+                    const radioButton = questionElement.querySelector(`input[type="radio"][value="${answerIndex}"]`);
+                    if (radioButton) {
+                        radioButton.checked = true;
+                    }
+                }
+            });
+            
+            console.log('Restored selections:', currentQuizAnswers);
+        }
+    } catch (e) {
+        console.warn('Could not restore selections from localStorage:', e);
+    }
 }
 
 // Toggle section visibility
@@ -104,36 +232,16 @@ function updateCurrentTime() {
     }
 }
 
-// Handle answer selection
-function selectAnswer(questionIndex, answerIndex) {
-    currentQuizAnswers[questionIndex] = answerIndex;
-    
-    // Visual feedback
-    const questionElement = document.querySelector(`[data-question="${questionIndex}"]`);
-    if (questionElement) {
-        questionElement.classList.add('answered');
-        
-        // Remove previous selection styling
-        const options = questionElement.querySelectorAll('.option-label');
-        options.forEach(option => {
-            option.classList.remove('selected');
-        });
-        
-        // Add selection styling to current option
-        const selectedOption = questionElement.querySelector(`[data-option="${answerIndex}"]`);
-        if (selectedOption) {
-            selectedOption.classList.add('selected');
-        }
-    }
-}
-
-// Submit quiz
+// Submit quiz - PRESERVE SELECTIONS WITH CUSTOM STYLING
 function submitQuiz() {
     if (quizSubmitted) return;
     
     const allQuestions = document.querySelectorAll('.quiz-question');
     const totalQuestions = allQuestions.length;
     const answeredQuestions = Object.keys(currentQuizAnswers).length;
+    
+    console.log(`Submitting quiz: ${answeredQuestions}/${totalQuestions} questions answered`);
+    console.log('Answers:', currentQuizAnswers);
     
     if (answeredQuestions < totalQuestions) {
         if (!confirm(`Bạn chỉ trả lời ${answeredQuestions}/${totalQuestions} câu. Bạn có muốn nộp bài không?`)) {
@@ -143,15 +251,17 @@ function submitQuiz() {
     
     let correctAnswers = 0;
     
-    allQuestions.forEach((questionElement, index) => {
+    allQuestions.forEach((questionElement) => {
+        const questionId = questionElement.getAttribute('data-question');
         const correctAnswer = parseInt(questionElement.getAttribute('data-correct'));
-        const userAnswer = currentQuizAnswers[index];
+        const userAnswer = currentQuizAnswers[questionId];
         const isCorrect = userAnswer === correctAnswer;
         
         if (isCorrect) correctAnswers++;
         
         // Add submitted class to question
         questionElement.classList.add('submitted');
+        questionElement.style.borderColor = '#cccccc';
         
         // Show correct/incorrect visual feedback
         const options = questionElement.querySelectorAll('.option-label');
@@ -159,25 +269,94 @@ function submitQuiz() {
         options.forEach((option, optionIndex) => {
             const input = option.querySelector('input');
             
-            if (optionIndex === correctAnswer) {
-                option.classList.add('correct');
-            } else if (optionIndex === userAnswer && !isCorrect) {
-                option.classList.add('incorrect');
+            // Remove existing checkmarks
+            const existingCheckmark = option.querySelector('.custom-checkmark');
+            if (existingCheckmark) {
+                existingCheckmark.remove();
             }
             
+            // Highlight correct answer (green)
+            if (optionIndex === correctAnswer) {
+                option.style.border = '2px solid #4CAF50';
+                option.style.backgroundColor = '#E8F5E8';
+                
+                // Add correct checkmark
+                const correctMark = document.createElement('span');
+                correctMark.className = 'custom-checkmark';
+                correctMark.innerHTML = '✓';
+                correctMark.style.position = 'absolute';
+                correctMark.style.right = '15px';
+                correctMark.style.top = '50%';
+                correctMark.style.transform = 'translateY(-50%)';
+                correctMark.style.color = '#4CAF50';
+                correctMark.style.fontWeight = 'bold';
+                correctMark.style.fontSize = '16px';
+                
+                option.appendChild(correctMark);
+            }
+            
+            // Highlight incorrect user answer (red)
+            if (optionIndex === userAnswer && !isCorrect) {
+                option.style.border = '2px solid #f44336';
+                option.style.backgroundColor = '#FFEBEE';
+                
+                // Add incorrect mark
+                const incorrectMark = document.createElement('span');
+                incorrectMark.className = 'custom-checkmark';
+                incorrectMark.innerHTML = '✗';
+                incorrectMark.style.position = 'absolute';
+                incorrectMark.style.right = '15px';
+                incorrectMark.style.top = '50%';
+                incorrectMark.style.transform = 'translateY(-50%)';
+                incorrectMark.style.color = '#f44336';
+                incorrectMark.style.fontWeight = 'bold';
+                incorrectMark.style.fontSize = '16px';
+                
+                option.appendChild(incorrectMark);
+            }
+            
+            // Keep the selected style for user's correct answer
+            if (optionIndex === userAnswer && isCorrect) {
+                option.style.border = '2px solid #4CAF50';
+                option.style.backgroundColor = '#E8F5E8';
+                
+                // Add correct checkmark
+                const correctMark = document.createElement('span');
+                correctMark.className = 'custom-checkmark';
+                correctMark.innerHTML = '✓';
+                correctMark.style.position = 'absolute';
+                correctMark.style.right = '15px';
+                correctMark.style.top = '50%';
+                correctMark.style.transform = 'translateY(-50%)';
+                correctMark.style.color = '#4CAF50';
+                correctMark.style.fontWeight = 'bold';
+                correctMark.style.fontSize = '16px';
+                
+                option.appendChild(correctMark);
+            }
+            
+            // Disable all inputs after submission
             input.disabled = true;
+            input.style.cursor = 'not-allowed';
         });
+        
+        console.log(`Question ${questionId}: correct=${correctAnswer}, user=${userAnswer}, isCorrect=${isCorrect}`);
     });
     
     // Show results
     displayResults(correctAnswers, totalQuestions);
     quizSubmitted = true;
     
+    // Clear saved selections after submission
+    clearSavedSelections();
+    
     // Disable submit button
     const submitBtn = document.getElementById('submit-quiz');
     if (submitBtn) {
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<i class="fas fa-check"></i> Đã nộp bài';
+        submitBtn.style.cursor = 'not-allowed';
+        submitBtn.style.opacity = '0.6';
     }
 }
 
@@ -217,9 +396,11 @@ function displayResults(score, total) {
         // Scroll to results
         resultDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
+    
+    console.log(`Quiz results: ${score}/${total} (${percentage.toFixed(1)}%)`);
 }
 
-// Reset quiz
+// Reset quiz - CLEAR ALL SELECTIONS AND CUSTOM STYLING
 function resetQuiz() {
     if (!confirm('Bạn có chắc muốn làm lại bài tập? Tất cả đáp án sẽ bị xóa.')) {
         return;
@@ -228,17 +409,39 @@ function resetQuiz() {
     currentQuizAnswers = {};
     quizSubmitted = false;
     
-    // Reset visual feedback
+    // Clear saved selections
+    clearSavedSelections();
+    
+    // Reset visual feedback and custom styling
     const questionElements = document.querySelectorAll('.quiz-question');
     questionElements.forEach(element => {
         element.classList.remove('answered', 'submitted');
+        element.style.borderLeft = '';
+        element.style.backgroundColor = '';
+        element.style.borderColor = '';
         
         const options = element.querySelectorAll('.option-label');
         options.forEach(option => {
+            // Remove custom classes
             option.classList.remove('correct', 'incorrect', 'selected');
+            
+            // Reset custom styles
+            option.style.border = '';
+            option.style.backgroundColor = '';
+            option.style.position = '';
+            
+            // Remove custom checkmarks
+            const existingCheckmark = option.querySelector('.custom-checkmark');
+            if (existingCheckmark) {
+                existingCheckmark.remove();
+            }
+            
+            // Reset radio buttons
             const input = option.querySelector('input');
             input.checked = false;
             input.disabled = false;
+            input.style.borderColor = '';
+            input.style.cursor = '';
         });
     });
     
@@ -253,6 +456,20 @@ function resetQuiz() {
     if (submitBtn) {
         submitBtn.disabled = false;
         submitBtn.innerHTML = '<i class="fas fa-check"></i> Nộp bài';
+        submitBtn.style.cursor = '';
+        submitBtn.style.opacity = '';
+    }
+    
+    console.log('Quiz reset successfully');
+    console.log('Current answers:', currentQuizAnswers);
+}
+
+// Clear saved selections from storage
+function clearSavedSelections() {
+    try {
+        localStorage.removeItem('quizSelections');
+    } catch (e) {
+        console.warn('Could not clear selections from localStorage:', e);
     }
 }
 
